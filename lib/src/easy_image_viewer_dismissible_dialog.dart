@@ -13,6 +13,7 @@ class EasyImageViewerDismissibleDialog extends StatefulWidget {
   final bool immersive;
   final void Function(int)? onPageChanged;
   final void Function(int)? onViewerDismissed;
+  final void Function(BuildContext)? onContextReady;
   final bool useSafeArea;
   final bool swipeDismissible;
   final bool doubleTapZoomable;
@@ -26,6 +27,7 @@ class EasyImageViewerDismissibleDialog extends StatefulWidget {
       this.immersive = true,
       this.onPageChanged,
       this.onViewerDismissed,
+      this.onContextReady,
       this.useSafeArea = false,
       this.swipeDismissible = false,
       this.doubleTapZoomable = false,
@@ -35,12 +37,10 @@ class EasyImageViewerDismissibleDialog extends StatefulWidget {
       : super(key: key);
 
   @override
-  State<EasyImageViewerDismissibleDialog> createState() =>
-      _EasyImageViewerDismissibleDialogState();
+  State<EasyImageViewerDismissibleDialog> createState() => _EasyImageViewerDismissibleDialogState();
 }
 
-class _EasyImageViewerDismissibleDialogState
-    extends State<EasyImageViewerDismissibleDialog> {
+class _EasyImageViewerDismissibleDialogState extends State<EasyImageViewerDismissibleDialog> {
   /// This is used to either activate or deactivate the ability to swipe-to-dismissed, based on
   /// whether the current image is zoomed in (scale > 0) or not.
   DismissDirection _dismissDirection = DismissDirection.down;
@@ -56,8 +56,7 @@ class _EasyImageViewerDismissibleDialogState
   @override
   void initState() {
     super.initState();
-    _pageController =
-        PageController(initialPage: widget.imageProvider.initialIndex);
+    _pageController = PageController(initialPage: widget.imageProvider.initialIndex);
     if (widget.onPageChanged != null) {
       _internalPageChangeListener = () {
         widget.onPageChanged!(_pageController.page?.round() ?? 0);
@@ -77,6 +76,7 @@ class _EasyImageViewerDismissibleDialogState
 
   @override
   Widget build(BuildContext context) {
+    widget.onContextReady?.call(context);
     final popScopeAwareDialog = WillPopScope(
         onWillPop: () async {
           _handleDismissal();
@@ -88,36 +88,30 @@ class _EasyImageViewerDismissibleDialogState
             insetPadding: const EdgeInsets.all(0),
             // We set the shape here to ensure no rounded corners allow any of the
             // underlying view to show. We want the whole background to be covered.
-            shape:
-                const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-            child: Stack(
-                clipBehavior: Clip.none,
-                alignment: Alignment.center,
-                children: <Widget>[
-                  EasyImageViewPager(
-                      easyImageProvider: widget.imageProvider,
-                      pageController: _pageController,
-                      doubleTapZoomable: widget.doubleTapZoomable,
-                      onScaleChanged: (scale) {
-                        setState(() {
-                          _dismissDirection = scale <= 1.0
-                              ? DismissDirection.down
-                              : DismissDirection.none;
-                        });
-                      }),
-                  Positioned(
-                      top: 5,
-                      right: 5,
-                      child: IconButton(
-                        icon: const Icon(Icons.close),
-                        color: widget.closeButtonColor,
-                        tooltip: widget.closeButtonTooltip,
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          _handleDismissal();
-                        },
-                      ))
-                ])));
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+            child: Stack(clipBehavior: Clip.none, alignment: Alignment.center, children: <Widget>[
+              EasyImageViewPager(
+                  easyImageProvider: widget.imageProvider,
+                  pageController: _pageController,
+                  doubleTapZoomable: widget.doubleTapZoomable,
+                  onScaleChanged: (scale) {
+                    setState(() {
+                      _dismissDirection = scale <= 1.0 ? DismissDirection.down : DismissDirection.none;
+                    });
+                  }),
+              Positioned(
+                  top: 5,
+                  right: 5,
+                  child: IconButton(
+                    icon: const Icon(Icons.close),
+                    color: widget.closeButtonColor,
+                    tooltip: widget.closeButtonTooltip,
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _handleDismissal();
+                    },
+                  ))
+            ])));
 
     if (widget.swipeDismissible) {
       return Dismissible(
