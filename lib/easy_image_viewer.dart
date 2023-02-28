@@ -12,6 +12,7 @@ import 'src/single_image_provider.dart';
 export 'src/easy_image_provider.dart' show EasyImageProvider;
 export 'src/single_image_provider.dart' show SingleImageProvider;
 export 'src/multi_image_provider.dart' show MultiImageProvider;
+export 'src/easy_image_viewer_dismissible_dialog.dart' show EasyImageViewerDismissibleDialog;
 
 export 'src/easy_image_view.dart' show EasyImageView;
 export 'src/easy_image_view_pager.dart' show EasyImageViewPager;
@@ -31,8 +32,7 @@ const _defaultCloseButtonTooltip = 'Close';
 /// The [closeButtonTooltip] text is displayed when the user long-presses on the
 /// close button and is used for accessibility.
 /// The [closeButtonColor] defaults to white, but can be set to any other color.
-Future<Dialog?> showImageViewer(
-    BuildContext context, ImageProvider imageProvider,
+Future<Dialog?> showImageViewer(BuildContext context, ImageProvider imageProvider,
     {bool immersive = true,
     void Function()? onViewerDismissed,
     bool useSafeArea = false,
@@ -43,8 +43,7 @@ Future<Dialog?> showImageViewer(
     Color closeButtonColor = _defaultCloseButtonColor}) {
   return showImageViewerPager(context, SingleImageProvider(imageProvider),
       immersive: immersive,
-      onViewerDismissed:
-          onViewerDismissed != null ? (_) => onViewerDismissed() : null,
+      onViewerDismissed: onViewerDismissed != null ? (_) => onViewerDismissed() : null,
       useSafeArea: useSafeArea,
       swipeDismissible: swipeDismissible,
       doubleTapZoomable: doubleTapZoomable,
@@ -66,8 +65,7 @@ Future<Dialog?> showImageViewer(
 /// The [closeButtonTooltip] text is displayed when the user long-presses on the
 /// close button and is used for accessibility.
 /// The [closeButtonColor] defaults to white, but can be set to any other color.
-Future<Dialog?> showImageViewerPager(
-    BuildContext context, EasyImageProvider imageProvider,
+Future<Dialog?> showImageViewerPager(BuildContext context, EasyImageProvider imageProvider,
     {bool immersive = true,
     void Function(int)? onPageChanged,
     void Function(int)? onViewerDismissed,
